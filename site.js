@@ -10,7 +10,7 @@ function checkReveals() {
   document.querySelectorAll('.reveal:not(.in-view)').forEach((el) => {
     if (el.offsetParent === null) return;
     const rect = el.getBoundingClientRect();
-    if (rect.top < vh * 0.92 && rect.bottom > 0) el.classList.add('in-view');
+    if (rect.top < vh * 0.92) el.classList.add('in-view');
   });
 }
 function initReveal() {

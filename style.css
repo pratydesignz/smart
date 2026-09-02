@@ -609,6 +609,9 @@ video-slot .vs-toolbar button:hover { background: var(--navy-hover); }
 }
 
 @media (max-width: 700px) {
+  .site-footer { padding-bottom: 100px; }
+  .link-panel-wrap { right: 16px; bottom: 16px; }
+  .link-panel-toggle { padding: 12px 16px; font-size: 13px; }
   .home-hero h1 { font-size: 38px; }
   .home-hero .lead { font-size: 17px; }
   .page-hero h1 { font-size: 34px; }
