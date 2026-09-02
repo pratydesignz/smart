@@ -53,6 +53,12 @@ p { margin: 0; }
 button { font-family: inherit; }
 
 @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1); }
+.reveal.in-view { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .home-hero .hero-copy { animation: none !important; }
+}
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
 
@@ -164,9 +170,9 @@ section.block:last-of-type { padding-bottom: 104px; }
 .services-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; margin-top: 44px; }
 .svc-card {
   background: #fff; border: 1px solid var(--card-border); border-radius: 22px; padding: 34px 30px 32px;
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
-.svc-card:hover { border-color: var(--gold); box-shadow: 0 14px 34px rgba(18,18,79,0.10); }
+.svc-card:hover { border-color: var(--gold); box-shadow: 0 14px 34px rgba(18,18,79,0.10); transform: translateY(-5px); }
 .svc-card.dark { background: var(--navy); border: none; }
 .svc-card.dark:hover { box-shadow: 0 14px 34px rgba(18,18,79,0.25); }
 .svc-num {
@@ -209,7 +215,10 @@ section.block:last-of-type { padding-bottom: 104px; }
   background: #fff; border: 1px solid var(--card-border); border-radius: 20px; padding: 30px 28px;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
-.info-card:hover { border-color: var(--gold); box-shadow: 0 12px 30px rgba(18,18,79,0.08); }
+.info-card { transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.info-card:hover { border-color: var(--gold); box-shadow: 0 12px 30px rgba(18,18,79,0.08); transform: translateY(-5px); }
+.info-card .icon { transition: transform .2s ease; }
+.info-card:hover .icon { transform: scale(1.08); }
 .info-card .icon {
   width: 46px; height: 46px; border-radius: 12px; background: #f2ecda;
   display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
@@ -352,9 +361,9 @@ table.specs tbody tr:first-child { border-top: none; }
 .client-cards { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; margin-top: 24px; }
 .client-card {
   background: #fff; border: 1px solid var(--card-border); border-radius: 20px; padding: 28px 26px;
-  transition: border-color .15s ease;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
 }
-.client-card:hover { border-color: var(--gold); }
+.client-card:hover { border-color: var(--gold); transform: translateY(-4px); box-shadow: 0 10px 26px rgba(18,18,79,0.08); }
 .client-card .facet-sm {
   width: 38px; height: 38px; clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background: var(--gold); margin-bottom: 18px;
@@ -477,7 +486,6 @@ image-slot .is-urlbox button {
 .video-thumb-link:hover .video-thumb-play svg { transform: scale(1.08); }
 .ourwork-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; margin-top: 22px; }
 .ourwork-grid > a { display: block; border-radius: 20px; overflow: hidden; aspect-ratio: 16/9; background: #ece7db; }
-@media (max-width: 520px) { .ourwork-grid { grid-template-columns: minmax(0,1fr); } }
 video-slot { display: block; position: relative; width: 100%; height: 100%; }
 video-slot .vs-empty {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -607,7 +615,8 @@ video-slot .vs-toolbar button:hover { background: var(--navy-hover); }
   .page-hero p { font-size: 16px; }
   .section-title { font-size: 28px; }
   .services-grid, .card-grid-3, .feature-grid, .bring-grid, .mission-grid, .steps, .clients-grid,
-  .gallery-slots, .brands-grid, .client-cards, .form-grid, .cert-grid, .videos-grid { grid-template-columns: minmax(0,1fr); }
+  .gallery-slots, .brands-grid, .client-cards, .form-grid, .cert-grid, .videos-grid, .ourwork-grid { grid-template-columns: minmax(0,1fr); }
+  .video-thumb-play svg { width: 54px; height: 54px; }
   .steps { border-top: none; }
   .step { border-top: 2px solid var(--navy); }
   .form-grid .full { grid-column: span 1; }
@@ -1822,12 +1831,35 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavToggle();
   initTestimonials();
   initLinkPanel();
+  initReveal();
   const submitBtn = document.getElementById('enquirySubmit');
   if (submitBtn) submitBtn.addEventListener('click', () => {
     document.getElementById('enquiryMsg').textContent = 'Thank you — this is a demo form. Connect it to your email before launch.';
   });
 });
 
+function checkReveals() {
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  document.querySelectorAll('.reveal:not(.in-view)').forEach((el) => {
+    if (el.offsetParent === null) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.top < vh * 0.92 && rect.bottom > 0) el.classList.add('in-view');
+  });
+}
+function initReveal() {
+  document.querySelectorAll('section.block, section.page-hero, .testimonials, .stats-bar').forEach((el) => {
+    el.classList.add('reveal');
+  });
+  checkReveals();
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { checkReveals(); ticking = false; });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+}
 function initNavToggle() {
   const toggle = document.querySelector('.nav-toggle');
   const nav = document.querySelector('.main-nav');
@@ -1839,10 +1871,11 @@ function initTestimonials() {
   const quoteEl = document.getElementById('testimonial-quote');
   if (!quoteEl) return;
   const testimonials = [
-    { q: 'The barrier line at our main gate runs all day and has not stopped once since commissioning. Response on service calls is same-day.', n: 'Facility Manager', r: 'Corporate campus, Chandigarh' },
-    { q: 'Work was completed inside a secure premises without disruption. Documentation and clearances were handled properly throughout.', n: 'Estate Officer', r: 'Government institution, Punjab' },
-    { q: 'Stack parking doubled the cars we can hold in the same basement. Installation was clean and the system is simple for our staff to operate.', n: 'Project Head', r: 'Hospitality group' },
-    { q: 'They did excellent work in installing the automatic gate at a fair price, and the after-sales service has been just as good.', n: 'Rajat Sharma', r: 'Private residence' }
+    { q: 'Security clearance, site access, everything was coordinated properly before work even started. The boom barrier at our gate has run without a single breakdown since.', n: 'Estate Officer', r: 'Government headquarters, Mohali' },
+    { q: 'We needed a system that a guard could operate without training and that would survive a diplomatic-grade duty cycle. Two years on, it still opens on the first try, every time.', n: 'Facilities In-Charge', r: 'Diplomatic mission, New Delhi' },
+    { q: 'Stack parking took us from 40 cars to over 70 in the same basement footprint. The civil work was tidy and guests barely noticed the installation happening.', n: 'Project Head', r: 'Hotel group, Lucknow' },
+    { q: 'Our sliding gate handles truck traffic all day at the factory gate. Loop detection means it never closes on a vehicle, and one AMC visit is all it has needed this year.', n: 'Plant Manager', r: 'Manufacturing unit, Punjab' },
+    { q: 'Fair quote, honest timeline, and they stuck to both. The gate at home has been trouble-free for over a year and their service call was answered the same evening I called.', n: 'Rajat Sharma', r: 'Private residence' }
   ];
   const nameEl = document.getElementById('testimonial-name');
   const roleEl = document.getElementById('testimonial-role');
@@ -1927,6 +1960,7 @@ function showPage(key) {
   document.querySelectorAll('[data-goto]').forEach((a) => a.classList.toggle('active', a.dataset.goto === key));
   window.scrollTo(0, 0);
   document.querySelectorAll('.main-nav').forEach((n) => n.classList.remove('open'));
+  if (typeof checkReveals === 'function') requestAnimationFrame(checkReveals);
 }
 document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-goto]');
