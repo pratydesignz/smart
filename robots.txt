@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pratydesignz.github.io/smart/sitemap.xml
